@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sola Payment Form</title>
+    <script src="https://cdn.cardknox.com/ifields/latest/ifields.min.js"></script>
+</head>
+<body>
+    <h2>Enter Payment Info</h2>
+    <form id="payment-form">
+        <iframe data-ifields-id="card-number" data-ifields-placeholder="Card Number" src="https://cdn.cardknox.com/ifields/latest/ifield.htm"></iframe>
+        <input name="xCardNum" data-ifields-id="card-number-token" type="hidden" />
+        
+        <iframe data-ifields-id="cvv" data-ifields-placeholder="CVV" src="https://cdn.cardknox.com/ifields/latest/ifield.htm"></iframe>
+        <input name="xCVV" data-ifields-id="cvv-token" type="hidden" />
+        
+        <input id="submit-btn" type="submit" value="Pay" />
+    </form>
+
+    <script>
+        setAccount("your-public-ifields-key", "YourSoftwareName", "0.1.0");
+
+        document.getElementById('payment-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+
+            getTokens(function() {
+                alert('Tokens received! Now you need to send these tokens to your server to complete payment.');
+                submitBtn.disabled = false;
+                // Here, you will later add code to send the tokens to your backend API
+            }, function() {
+                alert('Error retrieving tokens. Please try again.');
+                submitBtn.disabled = false;
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
