@@ -34,18 +34,6 @@
   <form id="payment-form" class="bg-white p-8 rounded-lg shadow-md w-full max-w-md" novalidate>
     <h2 class="text-2xl font-semibold mb-6 text-gray-700">Enter Payment Details</h2>
 
-    <!-- ACH (optional, remove if not needed) -->
-    <label for="ach" class="block mb-1 font-medium text-gray-700">Checking Account Number</label>
-    <div class="ifield-wrapper">
-      <iframe
-        data-ifields-id="ach"
-        data-ifields-placeholder="Checking Account Number"
-        src="https://cdn.cardknox.com/ifields/3.1.2507.1501/ifield.htm"
-        title="ACH input"
-      ></iframe>
-    </div>
-    <input name="xACH" data-ifields-id="ach-token" type="hidden" />
-
     <!-- Card Number -->
     <label for="card-number" class="block mb-1 font-medium text-gray-700">Card Number</label>
     <div class="ifield-wrapper">
@@ -116,10 +104,9 @@
           // Tokens are populated automatically in hidden inputs
           const xCardNum = form.querySelector('[name="xCardNum"]').value;
           const xCVV = form.querySelector('[name="xCVV"]').value;
-          const xACH = form.querySelector('[name="xACH"]').value;
           const xAmount = form.querySelector('[name="xAmount"]').value;
 
-          console.log("SUTs and amount:", { xCardNum, xCVV, xACH, xAmount });
+          console.log("SUTs and amount:", { xCardNum, xCVV, xAmount });
 
           // TODO: send this data to your backend to process payment via Sola API
 
