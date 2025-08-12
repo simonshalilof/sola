@@ -1,107 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Modern Payment Form</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://ifields.solapayments.com/ifields.min.js"></script>
+<meta charset="UTF-8">
+<title>Secure Payment Form</title>
+<script src="https://cdn.cardknox.com/ifields/3.1.2507.1501/ifields.min.js"></script>
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f7fa;
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+  }
+  .payment-form {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.05);
+    max-width: 400px;
+    width: 100%;
+  }
+  .field {
+    margin-bottom: 18px;
+  }
+  .label {
+    font-weight: 500;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .ifield-wrapper {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 12px;
+    background: #fff;
+    transition: border-color 0.2s;
+    height: 40px;
+  }
+  .ifield-wrapper:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+  }
+  input[type="number"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: #3b82f6;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button:hover {
+    background: #2563eb;
+  }
+</style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+<body>
 
-  <div class="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
-    <h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Secure Payment</h1>
-
-    <form id="payment-form" class="space-y-5">
-      
-      <!-- Amount -->
-      <div>
-        <label class="block text-gray-700 font-medium mb-1">Amount</label>
-        <input id="xAmount" name="xAmount" type="number" step="0.01"
-          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-      </div>
-
-      <!-- Card Info Row -->
-      <div class="space-y-4">
-        <div>
-          <label class="block text-gray-700 font-medium mb-1">Card Number</label>
-          <div id="card-number" class="border border-gray-300 rounded-lg px-4 py-3 bg-gray-50"></div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-gray-700 font-medium mb-1">Expiry Date</label>
-            <div id="card-expiry" class="border border-gray-300 rounded-lg px-4 py-3 bg-gray-50"></div>
-          </div>
-          <div>
-            <label class="block text-gray-700 font-medium mb-1">CVV</label>
-            <div id="card-cvv" class="border border-gray-300 rounded-lg px-4 py-3 bg-gray-50"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Error Message -->
-      <p id="error-message" class="text-red-600 text-sm"></p>
-
-      <!-- Submit Button -->
-      <button id="submit-btn" type="submit"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">
-        Pay Now
-      </button>
-    </form>
+<form id="payment-form" class="payment-form">
+  <div class="field">
+    <label class="label">Card Number</label>
+    <div class="ifield-wrapper" data-ifields-id="card-number"></div>
   </div>
 
-  <script>
-    // Initialize iFields
-    setAccount("ifields_systemizedev455ddd9725014df6afa1cd83b", "YourSoftwareName", "0.1.0");
+  <div class="field">
+    <label class="label">Expiration Date</label>
+    <div class="ifield-wrapper" data-ifields-id="exp-date"></div>
+  </div>
 
-    // Create the secure card fields
-    ifield({ id: "card-number", placeholder: "•••• •••• •••• ••••", type: "card-number" });
-    ifield({ id: "card-expiry", placeholder: "MM/YY", type: "exp-date" });
-    ifield({ id: "card-cvv", placeholder: "•••", type: "cvv" });
+  <div class="field">
+    <label class="label">CVV</label>
+    <div class="ifield-wrapper" data-ifields-id="cvv"></div>
+  </div>
 
-    const form = document.getElementById("payment-form");
-    const submitBtn = document.getElementById("submit-btn");
-    const errorLabel = document.getElementById("error-message");
+  <div class="field">
+    <label class="label">Amount</label>
+    <input type="number" id="amount" name="xAmount" value="10.00" step="0.01" min="0.01" required>
+  </div>
 
-    form.addEventListener("submit", function(e) {
-      e.preventDefault();
-      submitBtn.disabled = true;
-      errorLabel.textContent = "";
+  <button type="submit" id="submit-btn">Pay Now</button>
+</form>
 
-      getTokens(
-        function() {
-          const payload = {
-            xCardNum: document.querySelector('[name="xCardNum"]').value,
-            xExp: document.querySelector('[name="xExp"]').value,
-            xCVV: document.querySelector('[name="xCVV"]').value,
-            xAmount: document.getElementById('xAmount').value
-          };
+<script>
+  // 1. Initialize iFields
+  setAccount("ifields_systemizedev455ddd9725014df6afa1cd83b", "YourSoftwareName", "1.0.0");
 
-          fetch("https://hook.us1.make.com/9v8fhkufrppepywkd0r6b2gk3qerk4os", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          })
-          .then(res => res.json())
-          .then(data => {
-            alert("Payment processed!");
-            console.log(data);
-            submitBtn.disabled = false;
-          })
-          .catch(err => {
-            console.error(err);
-            errorLabel.textContent = "Error processing payment.";
-            submitBtn.disabled = false;
-          });
-        },
-        function(error) {
-          submitBtn.disabled = false;
-          errorLabel.textContent = error || "Failed to tokenize card data.";
-        },
-        30000
-      );
+  // 2. Handle form submission
+  document.getElementById('payment-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Processing...";
+
+    // 3. Get token from iFields
+    getTokens(function() {
+      const cardToken = document.querySelector('[data-ifields-id="card-number"]').dataset.ifieldsToken;
+      const cvvToken = document.querySelector('[data-ifields-id="cvv"]').dataset.ifieldsToken;
+      const expToken = document.querySelector('[data-ifields-id="exp-date"]').dataset.ifieldsToken;
+      const amount = document.getElementById('amount').value;
+
+      // 4. Send to Make.com webhook
+      fetch("https://hook.eu1.make.com/YOUR_WEBHOOK_ID", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cardToken: cardToken,
+          cvvToken: cvvToken,
+          expToken: expToken,
+          amount: amount
+        })
+      })
+      .then(res => res.text())
+      .then(response => {
+        alert("Payment data sent successfully!");
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Pay Now";
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Error sending payment data.");
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Pay Now";
+      });
     });
-  </script>
+  });
+</script>
+
 </body>
 </html>
