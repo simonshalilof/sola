@@ -37,38 +37,35 @@
   </div>
 
   <script>
-    // ====== CONFIGURE THIS ======
-    const SOLA_PAYMENT_SITE_URL = "https://secure.cardknox.com/YOUR_PAYMENT_SITE_ID"; // Replace with your Sola Payments PaymentSITE URL
-    const DEFAULT_AMOUNT = 1999; // cents
+    const SOLA_PAYMENT_SITE_URL = "https://secure.cardknox.com/YOUR_PAYMENT_SITE_ID"; // Replace with your PaymentSITE URL
+    const DEFAULT_AMOUNT = 1999; // in cents
 
-    // ====== READ AMOUNT FROM URL ======
     const urlParams = new URLSearchParams(window.location.search);
     let amount = parseInt(urlParams.get("amount"), 10);
     if (isNaN(amount) || amount <= 0) amount = DEFAULT_AMOUNT;
 
-    // ====== UPDATE UI ======
     const amountDisplay = document.getElementById("amount-display");
     amountDisplay.value = `$${(amount / 100).toFixed(2)}`;
 
     const payButton = document.getElementById("pay-button");
     payButton.textContent = `Pay $${(amount / 100).toFixed(2)}`;
 
-    // ====== HANDLE PAYMENT REDIRECT ======
     payButton.addEventListener("click", (e) => {
       e.preventDefault();
 
       const name = document.getElementById("name").value.trim();
       const email = document.getElementById("email").value.trim();
 
-      // Build redirect URL with Sola Payments parameters
       const params = new URLSearchParams({
-        xamount: (amount / 100).toFixed(2), // PaymentSITE expects dollars
-        xname: name,
-        xemail: email,
-        xredirecturl: window.location.origin + "/success.html" // Adjust for your site
+        xKey: "YOUR_SOLA_API_KEY", // Replace with your Sola API key
+        xCommand: "cc:sale", // Transaction type (e.g., sale, authonly)
+        xAmount: (amount / 100).toFixed(2), // Amount in dollars
+        xName: name,
+        xEmail: email,
+        xRedirectURL: window.location.origin + "/success.html", // Redirect URL after payment
+        xRedirectURL_NotApproved: window.location.origin + "/failure.html", // Redirect URL if payment is not approved
       });
 
-      // Redirect to Sola Payments hosted page
       window.location.href = `${SOLA_PAYMENT_SITE_URL}?${params.toString()}`;
     });
   </script>
