@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-gray-100">
+<html lang="en" class="h-full bg-gray-50">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Card Payment with Sola iFields & Tailwind CSS</title>
+  <title>Secure Card Payment</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Sola iFields JS - Latest version -->
+  <!-- Sola iFields JS -->
   <script src="https://cdn.cardknox.com/ifields/3.1.2507.1501/ifields.min.js"></script>
 
   <style>
@@ -18,7 +18,7 @@
       padding: 0.5rem 0.75rem;
       background-color: white;
       width: 100%;
-      height: 2.5rem;
+      height: 2.75rem;
       margin-bottom: 0.75rem;
     }
     iframe[data-ifields-id] {
@@ -30,44 +30,75 @@
   </style>
 </head>
 <body class="h-full flex items-center justify-center p-6">
-  <form id="payment-form" class="bg-white p-8 rounded-lg shadow-md w-full max-w-md" novalidate>
-    <h2 class="text-2xl font-semibold mb-6 text-gray-700">Enter Payment Details</h2>
+
+  <form id="payment-form" class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md" novalidate>
+    <h2 class="text-3xl font-bold mb-8 text-gray-800 text-center">Enter Payment Details</h2>
 
     <!-- Card Number -->
-    <label for="card-number" class="block mb-1 font-medium text-gray-700">Card Number</label>
+    <label for="card-number" class="block mb-1 font-semibold text-gray-700">Card Number</label>
     <div class="ifield-wrapper">
       <iframe
         data-ifields-id="card-number"
         data-ifields-placeholder="Card Number"
         src="https://cdn.cardknox.com/ifields/3.1.2507.1501/ifield.htm"
         title="Card Number input"
+        aria-label="Card Number"
       ></iframe>
     </div>
     <input name="xCardNum" data-ifields-id="card-number-token" type="hidden" />
 
     <!-- CVV -->
-    <label for="cvv" class="block mb-1 font-medium text-gray-700">CVV</label>
+    <label for="cvv" class="block mb-1 font-semibold text-gray-700">CVV</label>
     <div class="ifield-wrapper">
       <iframe
         data-ifields-id="cvv"
         data-ifields-placeholder="CVV"
         src="https://cdn.cardknox.com/ifields/3.1.2507.1501/ifield.htm"
         title="CVV input"
+        aria-label="CVV"
       ></iframe>
     </div>
     <input name="xCVV" data-ifields-id="cvv-token" type="hidden" />
+
+    <!-- Expiration Date -->
+    <div class="mb-6 grid grid-cols-2 gap-4">
+      <div>
+        <label for="exp-month" class="block mb-1 font-semibold text-gray-700">Expiration Month</label>
+        <select id="exp-month" name="xExpMonth" class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">Month</option>
+          <!-- Months 01 to 12 -->
+          <script>
+            for (let m=1; m<=12; m++) {
+              document.write(`<option value="${m.toString().padStart(2,'0')}">${m.toString().padStart(2,'0')}</option>`);
+            }
+          </script>
+        </select>
+      </div>
+      <div>
+        <label for="exp-year" class="block mb-1 font-semibold text-gray-700">Expiration Year</label>
+        <select id="exp-year" name="xExpYear" class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">Year</option>
+          <script>
+            const currentYear = new Date().getFullYear();
+            for (let y=currentYear; y<=currentYear+15; y++) {
+              document.write(`<option value="${y.toString().slice(2)}">${y}</option>`);
+            }
+          </script>
+        </select>
+      </div>
+    </div>
 
     <!-- Amount hidden input populated from URL -->
     <input type="hidden" name="xAmount" id="xAmount" value="0" />
 
     <!-- Error label -->
-    <label data-ifields-id="card-data-error" class="block min-h-[1.25rem] text-red-600 mb-4"></label>
+    <label data-ifields-id="card-data-error" class="block min-h-[1.25rem] text-red-600 mb-6"></label>
 
     <!-- Submit button -->
     <button
       id="submit-btn"
       type="submit"
-      class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-300"
+      class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300 font-semibold text-lg"
     >
       Pay Now
     </button>
@@ -87,7 +118,7 @@
     }
 
     // Initialize iFields
-    setAccount("your-public-facing-key", "MyTailwindApp", "0.1.0");
+    setAccount("your-public-facing-key", "MyTailwindApp", "0.2.0");
 
     const form = document.getElementById('payment-form');
     const submitBtn = document.getElementById('submit-btn');
@@ -95,8 +126,20 @@
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();
-      submitBtn.disabled = true;
       errorLabel.textContent = "";
+      submitBtn.disabled = true;
+
+      // Validate Expiration Date
+      const expMonth = form.querySelector('#exp-month').value;
+      const expYear = form.querySelector('#exp-year').value;
+      if (!expMonth || !expYear) {
+        errorLabel.textContent = "Please select expiration month and year.";
+        submitBtn.disabled = false;
+        return;
+      }
+
+      // Combine exp date as MMYY (e.g. "0925")
+      const xExp = expMonth + expYear;
 
       getTokens(
         function() {
@@ -104,12 +147,13 @@
           const payload = {
             xCardNum: form.querySelector('[name="xCardNum"]').value,
             xCVV: form.querySelector('[name="xCVV"]').value,
+            xExp: xExp,
             xAmount: form.querySelector('[name="xAmount"]').value,
             // add more data here if needed
           };
 
           // POST tokens and amount to Make webhook
-          fetch('https://hook.us1.make.com/9v8fhkufrppepywkd0r6b2gk3qerk4os', {
+          fetch('https://hook.make.com/your-webhook-url', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -125,6 +169,8 @@
             console.log('Make response:', data);
             submitBtn.disabled = false;
             form.reset();
+            // Reset amount if needed (or keep from URL)
+            if(amountFromUrl) document.getElementById('xAmount').value = amountFromUrl;
           })
           .catch(err => {
             console.error('Payment error:', err);
@@ -140,5 +186,6 @@
       );
     });
   </script>
+
 </body>
 </html>
